@@ -59,9 +59,12 @@ void Server::handleMessage(cMessage *msg)
         // examine all input queues, and request a new job from a non empty queue
         int k = selectionStrategy->select();
         if (k >= 0) {
-            EV << "requesting job from queue " << k << endl;
+
             cGate *gate = selectionStrategy->selectableGate(k);
-            check_and_cast<IPassiveQueue *>(gate->getOwnerModule())->request(gate->getIndex());
+            if( check_and_cast<IPassiveQueue *>(gate->getOwnerModule())->length()>0){
+                EV << "requesting job from queue " << k << endl;
+                check_and_cast<IPassiveQueue *>(gate->getOwnerModule())->request(gate->getIndex());
+            }
         }
     }
     else {
