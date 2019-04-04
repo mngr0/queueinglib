@@ -60,7 +60,10 @@ bool SelectionStrategy::isSelectable(cModule *module)
 {
     IPassiveQueue *pqueue = dynamic_cast<IPassiveQueue *>(module);
     if (pqueue != nullptr)
-        return pqueue->length() < 10;
+        if(isInputGate)
+            return pqueue->length() > 0;
+        else
+            return true;// output queue is assumed unlimited
 
     IServer *server = dynamic_cast<IServer *>(module);
     if (server != nullptr)
@@ -82,7 +85,6 @@ int PrioritySelectionStrategy::select()
     for (int i = 0; i < gateSize; i++)
         if (isSelectable(selectableGate(i)->getOwnerModule()))
             return i;
-
     // if none of them is selectable return an invalid no.
     return -1;
 }
@@ -101,7 +103,7 @@ int RandomSelectionStrategy::select()
     for (int i = 0; i < gateSize; i++)
         if (isSelectable(selectableGate(i)->getOwnerModule()))
             noOfSelectables++;
-
+    //EV << "noOfSelectables " << noOfSelectables << endl;
     int rnd = hostModule->intuniform(1, noOfSelectables);
 
     for (int i = 0; i < gateSize; i++)
